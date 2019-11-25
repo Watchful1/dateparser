@@ -14,7 +14,7 @@ from .timezone_parser import pop_tz_offset_from_string
 
 
 _UNITS = r'year|month|week|day|hour|minute|second'
-PATTERN = re.compile(r'(\d+)\s*(?:of the\s*)?(%s)\b' % _UNITS, re.I | re.S | re.U)
+PATTERN = re.compile(r'(\d+\.?\d*)\s*(?:of the\s*)?(%s)\b' % _UNITS, re.I | re.S | re.U)
 
 
 class FreshnessDateDataParser(object):
@@ -142,7 +142,11 @@ class FreshnessDateDataParser(object):
                     date = of_this_month - relativedelta(months=1)
         else:
             td = relativedelta(**kwargs)
-            if re.search(r'\bin\b', date_string):
+            if (
+                re.search(r'\bin\b', date_string) or
+                ('future' in prefer_dates_from and
+                 not re.search(r'\bago\b', date_string))
+            ):
                 date = self.now + td
             else:
                 date = self.now - td
