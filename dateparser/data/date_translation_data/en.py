@@ -252,6 +252,14 @@ info = {
             "(\\d+) second ago",
             "(\\d+) seconds ago",
             "(\\d+) sec ago"
+        ],
+        "\\1 of the month": [
+            "(\\d+)st of the month",
+            "(\\d+)nd of the month",
+            "(\\d+)rd of the month",
+            "(\\d+)th of the month",
+            "(\\d+)rd of the month",
+            "(\\d+)rd of the month"
         ]
     },
     "locale_specific": {
