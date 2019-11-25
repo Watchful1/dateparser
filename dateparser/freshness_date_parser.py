@@ -14,7 +14,7 @@ from .timezone_parser import pop_tz_offset_from_string
 
 
 _UNITS = r'year|month|week|day|hour|minute|second'
-PATTERN = re.compile(r'(\d+)\s*(%s)\b' % _UNITS, re.I | re.S | re.U)
+PATTERN = re.compile(r'(\d+)\s*(?:of the\s*)?(%s)\b' % _UNITS, re.I | re.S | re.U)
 
 
 class FreshnessDateDataParser(object):
@@ -25,7 +25,8 @@ class FreshnessDateDataParser(object):
     def _are_all_words_units(self, date_string):
         skip = [_UNITS,
                 r'ago|in|\d+',
-                r':|[ap]m']
+                r':|[ap]m',
+                r'of|the']
 
         date_string = re.sub(r'\s+', ' ', date_string.strip())
 
@@ -93,7 +94,7 @@ class FreshnessDateDataParser(object):
             else:
                 self.now = datetime.now(self.get_local_tz())
 
-        date, period = self._parse_date(date_string)
+        date, period = self._parse_date(date_string, settings.PREFER_DATES_FROM)
 
         if date:
             date = apply_time(date, _time)
@@ -110,7 +111,7 @@ class FreshnessDateDataParser(object):
         self.now = None
         return date, period
 
-    def _parse_date(self, date_string):
+    def _parse_date(self, date_string, prefer_dates_from):
         if not self._are_all_words_units(date_string):
             return None, None
 
@@ -125,11 +126,26 @@ class FreshnessDateDataParser(object):
                     period = k[:-1]
                     break
 
-        td = relativedelta(**kwargs)
-        if re.search(r'\bin\b', date_string):
-            date = self.now + td
+        if period == 'month' and re.search(r'\bof the\b', date_string):
+            period = 'day'
+            of_this_month = self.now + relativedelta(
+                day=int(kwargs['months']), hour=0, minute=0, second=0, microsecond=0)
+            if 'future' in prefer_dates_from:
+                if of_this_month > self.now:
+                    date = of_this_month
+                else:
+                    date = of_this_month + relativedelta(months=1)
+            else:
+                if of_this_month < self.now:
+                    date = of_this_month
+                else:
+                    date = of_this_month - relativedelta(months=1)
         else:
-            date = self.now - td
+            td = relativedelta(**kwargs)
+            if re.search(r'\bin\b', date_string):
+                date = self.now + td
+            else:
+                date = self.now - td
         return date, period
 
     def get_kwargs(self, date_string):
