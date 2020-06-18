@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from datetime import datetime, time
 
 from parameterized import parameterized, param
@@ -49,6 +51,11 @@ class TestTokenizer(BaseTestCase):
             expected_types=[1, 2, 0, 2, 0, 2, 0, 2, 1],
         ),
         param(
+            date_string=u"Oct 1 2018 4:40 PM EST —",
+            expected_tokens=['Oct', ' ', '1', ' ', '2018', ' ', '4:40', ' ', 'PM', ' ', 'EST', u' —'],
+            expected_types=[1, 2, 0, 2, 0, 2, 0, 2, 1, 2, 1, 2],
+        ),
+        param(
             date_string=tokenizer.digits,
             expected_tokens=[tokenizer.digits],
             expected_types=[0],
@@ -59,8 +66,8 @@ class TestTokenizer(BaseTestCase):
             expected_types=[1],
         ),
         param(
-            date_string=tokenizer.nonwords,
-            expected_tokens=[tokenizer.nonwords],
+            date_string=u"./\\()\"',.;<>~!@#$%^&*|+=[]{}`~?-—–     😊",  # unrecognized characters
+            expected_tokens=[u"./\\()\"',.;<>~!@#$%^&*|+=[]{}`~?-—–     😊"],
             expected_types=[2],
         ),
     ])
@@ -90,7 +97,6 @@ class TestNoSpaceParser(BaseTestCase):
         self.given_settings()
         self.when_date_is_parsed('2013 25 12')
         self.then_date_is_not_parsed()
-
 
     @parameterized.expand([
         param(
@@ -264,6 +270,45 @@ class TestNoSpaceParser(BaseTestCase):
         self.then_period_exactly_is(expected_period)
 
     @parameterized.expand([
+        param(
+            date_string=u"20110101",
+            expected_date=datetime(2011, 1, 1),
+            expected_period='day',
+        ),
+        param(
+            date_string=u"01201702",
+            expected_date=datetime(1702, 1, 20),
+            expected_period='day',
+        ),
+        param(
+            date_string=u"01202020",
+            expected_date=datetime(2020, 1, 20),
+            expected_period='day',
+        ),
+        param(
+            date_string=u"20202001",
+            expected_date=datetime(2020, 1, 20),
+            expected_period='day',
+        ),
+        param(
+            date_string=u"20202020",
+            expected_date=datetime(2002, 2, 2, 0, 2),
+            expected_period='day',
+        ),
+        param(
+            date_string=u"12345678",
+            expected_date=datetime(1234, 5, 6, 7, 8),
+            expected_period='day',
+        ),
+    ])
+    def test_best_order_used_if_date_order_not_supplied_to_8_digit_numbers(self, date_string, expected_date, expected_period):
+        self.given_parser()
+        self.given_settings(settings={'DATE_ORDER': ''})
+        self.when_date_is_parsed(date_string)
+        self.then_date_exactly_is(expected_date)
+        self.then_period_exactly_is(expected_period)
+
+    @parameterized.expand([
         param(date_string=u"12345678901234567890", date_order='YMD'),
         param(date_string=u"987654321234567890123456789", date_order='DMY'),
     ])
@@ -335,6 +380,46 @@ class TestParser(BaseTestCase):
     def test_error_is_raised_when_incomplete_dates_given(self, date_string):
         self.given_parser()
         self.given_settings(settings={'STRICT_PARSING': True})
+        self.then_error_is_raised_when_date_is_parsed(date_string)
+
+    @parameterized.expand([
+        param(date_string=u"april 2010"),
+        param(date_string=u"11 March"),
+        param(date_string=u"March"),
+        param(date_string=u"31 2010"),
+        param(date_string=u"31/2010"),
+    ])
+    def test_error_is_raised_when_partially_complete_dates_given(self, date_string):
+        self.given_parser()
+        self.given_settings(settings={'REQUIRE_PARTS': ['day', 'month', 'year']})
+        self.then_error_is_raised_when_date_is_parsed(date_string)
+
+    @parameterized.expand([
+        param(date_string=u"april 2010"),
+        param(date_string=u"March"),
+        param(date_string=u"2010"),
+    ])
+    def test_error_is_raised_when_day_part_missing(self, date_string):
+        self.given_parser()
+        self.given_settings(settings={'REQUIRE_PARTS': ['day']})
+        self.then_error_is_raised_when_date_is_parsed(date_string)
+
+    @parameterized.expand([
+        param(date_string=u"31 2010"),
+        param(date_string=u"31/2010"),
+    ])
+    def test_error_is_raised_when_month_part_missing(self, date_string):
+        self.given_parser()
+        self.given_settings(settings={'REQUIRE_PARTS': ['month']})
+        self.then_error_is_raised_when_date_is_parsed(date_string)
+
+    @parameterized.expand([
+        param(date_string=u"11 March"),
+        param(date_string=u"March"),
+    ])
+    def test_error_is_raised_when_year_part_missing(self, date_string):
+        self.given_parser()
+        self.given_settings(settings={'REQUIRE_PARTS': ['year']})
         self.then_error_is_raised_when_date_is_parsed(date_string)
 
     @parameterized.expand([

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from parameterized import parameterized, param
 from tests import BaseTestCase
@@ -6,6 +6,7 @@ from dateparser.timezone_parser import StaticTzInfo
 from dateparser.search.search import DateSearchWithDetection
 from dateparser.search import search_dates
 from dateparser.conf import Settings, apply_settings
+from dateparser_data.settings import default_parsers
 import datetime
 
 
@@ -273,6 +274,14 @@ class TestTranslateSearch(BaseTestCase):
               [(
                   'Aug 06, 2018 05:05 PM CDT',
                   datetime.datetime(2018, 8, 6, 17, 5, tzinfo=StaticTzInfo('CDT', datetime.timedelta(seconds=-18000))))],
+              settings={'RELATIVE_BASE': datetime.datetime(2000, 1, 1)}),
+        param('en', '25th march 2015 , i need this report today.',
+              [('25th march 2015', datetime.datetime(2015, 3, 25))],
+              settings={'PARSERS': [parser for parser in default_parsers
+                                    if parser != 'relative-time']}),
+        param('en', '25th march 2015 , i need this report today.',
+              [('25th march 2015', datetime.datetime(2015, 3, 25)),
+               ('today', datetime.datetime(2000, 1, 1))],
               settings={'RELATIVE_BASE': datetime.datetime(2000, 1, 1)}),
         param('en', 'in 2.5 hours',
               [('in 2.5 hours', datetime.datetime(2000, 1, 1, 2, 30))],
@@ -679,6 +688,15 @@ class TestTranslateSearch(BaseTestCase):
               languages=None,
               settings=None,
               expected=None),
+        # Date With comma and apostrophe
+        param(text="9/3/2017  , ",
+              languages=['en'],
+              settings=None,
+              expected=[('9/3/2017', datetime.datetime(2017, 9, 3, 0, 0))]),
+        param(text="9/3/2017  ' ",
+              languages=['en'],
+              settings=None,
+              expected=[('9/3/2017', datetime.datetime(2017, 9, 3, 0, 0))]),
     ])
     def test_date_search_function(self, text, languages, settings, expected):
         result = search_dates(text, languages=languages, settings=settings)

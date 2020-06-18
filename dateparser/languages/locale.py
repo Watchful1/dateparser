@@ -151,7 +151,7 @@ class Locale(object):
     def _translate_numerals(self, date_string):
         date_string_tokens = NUMERAL_PATTERN.split(date_string)
         for i, token in enumerate(date_string_tokens):
-            if token.isdigit():
+            if token.isdecimal():
                 date_string_tokens[i] = str(int(token)).zfill(len(token))
                 if isinstance(date_string_tokens[i], bytes):
                     date_string_tokens[i] = date_string_tokens[i].decode('utf-8')
@@ -248,13 +248,13 @@ class Locale(object):
             for digit_abbreviation in digit_abbreviations:
                 abbreviation_string += '(?<!' + digit_abbreviation + ')'  # negative lookbehind
 
-        splitters_dict = {1: '[\.!?;…\r\n]+(?:\s|$)+',  # most European, Tagalog, Hebrew, Georgian,
+        splitters_dict = {1: r'[\.!?;…\r\n]+(?:\s|$)+',  # most European, Tagalog, Hebrew, Georgian,
                           # Indonesian, Vietnamese
-                          2: '(?:[¡¿]+|[\.!?;…\r\n]+(?:\s|$))+',  # Spanish
-                          3: '[|!?;\r\n]+(?:\s|$)+',  # Hindi and Bangla
-                          4: '[。…‥\.!?？！;\r\n]+(?:\s|$)+',  # Japanese and Chinese
-                          5: '[\r\n]+',  # Thai
-                          6: '[\r\n؟!\.…]+(?:\s|$)+'}  # Arabic and Farsi
+                          2: r'(?:[¡¿]+|[\.!?;…\r\n]+(?:\s|$))+',  # Spanish
+                          3: r'[|!?;\r\n]+(?:\s|$)+',  # Hindi and Bangla
+                          4: r'[。…‥\.!?？！;\r\n]+(?:\s|$)+',  # Japanese and Chinese
+                          5: r'[\r\n]+',  # Thai
+                          6: r'[\r\n؟!\.…]+(?:\s|$)+'}  # Arabic and Farsi
         if 'sentence_splitter_group' not in self.info:
             split_reg = abbreviation_string + splitters_dict[1]
             sentences = re.split(split_reg, string)
@@ -346,29 +346,29 @@ class Locale(object):
         tokens = tokens[:]
         for i, token in enumerate(tokens):
             tokens[i] = re.split(regex, token)
-        return filter(bool, chain(*tokens))
+        return filter(bool, chain.from_iterable(tokens))
 
     def _split_tokens_by_known_words(self, tokens, keep_formatting, settings=None):
         dictionary = self._get_dictionary(settings)
         for i, token in enumerate(tokens):
             tokens[i] = dictionary.split(token, keep_formatting)
-        return list(chain(*tokens))
+        return list(chain.from_iterable(tokens))
 
     def _join_chunk(self, chunk, settings):
         if 'no_word_spacing' in self.info:
             return self._join(chunk, separator="", settings=settings)
         else:
-            return re.sub('\s{2,}', ' ', " ".join(chunk))
+            return re.sub(r'\s{2,}', ' ', " ".join(chunk))
 
     def _token_with_digits_is_ok(self, token):
         if 'no_word_spacing' in self.info:
-            if re.search('[\d\.:\-/]+', token) is not None:
+            if re.search(r'[\d\.:\-/]+', token) is not None:
                 return True
             else:
                 return False
 
         else:
-            if re.search('\d+', token) is not None:
+            if re.search(r'\d+', token) is not None:
                 return True
             else:
                 return False

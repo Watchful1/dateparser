@@ -493,7 +493,7 @@ class TestDateParser(BaseTestCase):
         param('April 2015', today=datetime(2015, 2, 28), expected=datetime(2015, 4, 28)),
         param('December 2014', today=datetime(2015, 2, 15), expected=datetime(2014, 12, 15)),
     ])
-    def test_dates_with_day_missing_prefering_current_day_of_month(
+    def test_dates_with_day_missing_preferring_current_day_of_month(
             self, date_string, today=None, expected=None):
         self.given_parser(settings={'PREFER_DAY_OF_MONTH': 'current', 'RELATIVE_BASE': today})
         self.when_date_is_parsed(date_string)
@@ -508,7 +508,7 @@ class TestDateParser(BaseTestCase):
         param('April 2015', today=datetime(2015, 2, 28), expected=datetime(2015, 4, 30)),
         param('December 2014', today=datetime(2015, 2, 15), expected=datetime(2014, 12, 31)),
     ])
-    def test_dates_with_day_missing_prefering_last_day_of_month(
+    def test_dates_with_day_missing_preferring_last_day_of_month(
             self, date_string, today=None, expected=None):
         self.given_parser(settings={'PREFER_DAY_OF_MONTH': 'last', 'RELATIVE_BASE': today})
         self.when_date_is_parsed(date_string)
@@ -523,7 +523,7 @@ class TestDateParser(BaseTestCase):
         param('April 2015', today=datetime(2015, 2, 28), expected=datetime(2015, 4, 1)),
         param('December 2014', today=datetime(2015, 2, 15), expected=datetime(2014, 12, 1)),
     ])
-    def test_dates_with_day_missing_prefering_first_day_of_month(
+    def test_dates_with_day_missing_preferring_first_day_of_month(
             self, date_string, today=None, expected=None):
         self.given_parser(settings={'PREFER_DAY_OF_MONTH': 'first', 'RELATIVE_BASE': today})
         self.when_date_is_parsed(date_string)
@@ -599,6 +599,11 @@ class TestDateParser(BaseTestCase):
         param('16:10', expected=datetime(2015, 2, 15, 16, 10), period='day'),
         param('2014', expected=datetime(2014, 2, 15), period='year'),
         param('2008', expected=datetime(2008, 2, 15), period='year'),
+        # subscript and superscript dates
+        param('²⁰¹⁵', expected=datetime(2015, 2, 15), period='year'),
+        param('²⁹/⁰⁵/²⁰¹⁵', expected=datetime(2015, 5, 29), period='day'),
+        param('₁₅/₀₂/₂₀₂₀', expected=datetime(2020, 2, 15), period='day'),
+        param('₃₁ December', expected=datetime(2015, 12, 31), period='day'),
     ])
     def test_extracted_period(self, date_string, expected=None, period=None):
         self.given_local_tz_offset(0)
@@ -694,6 +699,10 @@ class TestDateParser(BaseTestCase):
         param('10.1.2019', expected=datetime(2019, 1, 10, 0, 0), languages=['de']),
         param('10.1.2019', expected=datetime(2019, 10, 1, 0, 0),
               settings={'DATE_ORDER': 'MDY'}),
+        param('03/11/2559 05:13', datetime(2559, 3, 11, 5, 13), languages=["th"],
+              settings={"DATE_ORDER": "MDY"}),
+        param('03/15/2559 05:13', datetime(2559, 3, 15, 5, 13), languages=["th"],
+              settings={"DATE_ORDER": "MDY"})
     ])
     def test_if_settings_provided_date_order_is_retained(
         self, date_string, expected=None, languages=None, settings=None
