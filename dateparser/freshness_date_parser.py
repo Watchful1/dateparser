@@ -129,15 +129,15 @@ class FreshnessDateDataParser:
 
         if period == 'month' and re.search(r'\bof the\b', date_string):
             period = 'day'
-            of_this_month = self.now + relativedelta(
+            of_this_month = now + relativedelta(
                 day=int(kwargs['months']), hour=0, minute=0, second=0, microsecond=0)
             if 'future' in prefer_dates_from:
-                if of_this_month > self.now:
+                if of_this_month > now:
                     date = of_this_month
                 else:
                     date = of_this_month + relativedelta(months=1)
             else:
-                if of_this_month < self.now:
+                if of_this_month < now:
                     date = of_this_month
                 else:
                     date = of_this_month - relativedelta(months=1)
@@ -148,9 +148,9 @@ class FreshnessDateDataParser:
                 or re.search(r'\bfuture\b', prefer_dates_from)
                 and not re.search(r'\bago\b', date_string)
             ):
-                date = self.now + td
+                date = now + td
             else:
-                date = self.now - td
+                date = now - td
         return date, period
 
     def get_kwargs(self, date_string):
