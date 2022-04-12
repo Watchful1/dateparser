@@ -3,6 +3,87 @@
 History
 =======
 
+1.1.1 (2022-03-17)
+------------------
+
+Improvements:
+
+- Fixed issue with regex library by pinning dependencies to an earlier version (< 2022.3.15, #1046).
+- Extended support for Russian language dates starting with lowercase (#999).
+- Allowed to use_given_order for languages too (#997).
+- Fixed link to settings section (#1018).
+- Defined UTF-8 encoding for Windows (#998).
+- Fixed directories creation error in CLI utils (#1022).
+
+
+1.1.0 (2021-10-04)
+------------------
+
+New features:
+
+* Support language detection based on ``langdetect``, ``fastText``, or a
+  custom implementation (see #932)
+* Add support for 'by <time>' (see #839)
+* Sort default language list by internet usage (see #805)
+
+Improvements:
+
+* Improved support of Chinese (#910), Czech (#977)
+* Improvements in ``search_dates`` (see #953)
+* Make order of previous locales deterministic (see #851)
+* Fix parsing with trailing space (see #841)
+* Consider ``RETURN_TIME_AS_PERIOD`` for timestamp times (see #922)
+* Exclude failing regex version (see #974)
+* Ongoing work multithreading support (see #881, #885)
+* Add demo URL (see #883)
+
+QA:
+
+* Migrate pipelines from Travis CI to Github Actions (see #859, #879, #884,
+  #886, #911, #966)
+* Use versioned CLDR data (see #825)
+* Add a script to update table of supported languages and locales (see #601)
+* Sort 'skip' keys in yaml files (see #844)
+* Improve test coverage (see #827)
+* Code cleanup (see #888, #907, #951, #958, #957)
+
+
+1.0.0 (2020-10-29)
+------------------
+
+Breaking changes:
+
+* Drop support for Python 2.7 and pypy (see #727, #744, #748, #749, #754, #755, #758, #761, #763, #764, #777 and #783)
+* Now ``DateDataParser.get_date_data()`` returns a ``DateData`` object instead of a ``dict`` (see #778).
+* From now wrong ``settings`` are not silenced and raise ``SettingValidationError`` (see #797)
+* Now ``dateparser.parse()`` is deterministic and doesn't try previous locales. Also, ``DateDataParser.get_date_data()`` doesn't try the previous locales by default (see #781)
+* Remove the ``'base-formats'`` parser (see #721)
+* Extract the ``'no-spaces-time'`` parser from the ``'absolute-time'`` parser and make it an optional parser (see #786)
+* Remove ``numeral_translation_data`` (see #782)
+* Remove the undocumented ``SKIP_TOKENS_PARSER`` and ``FUZZY`` settings (see #728, #794)
+* Remove support for using strings in ``date_formats`` (see #726)
+* The undocumented ``ExactLanguageSearch`` class has been moved to the private scope and some internal methods have changed (see #778)
+* Changes in ``dateparser.utils``: ``normalize_unicode()`` doesn't accept ``bytes`` as input and ``convert_to_unicode`` has been deprecated (see #749)
+
+New features:
+
+* Add Python 3.9 support (see #732, #823)
+* Detect hours separated with a period/dot (see #741)
+* Add support for "decade" (see #762)
+* Add support for the hijri calendar in Python ≥ 3.6 (see #718)
+
+Improvements:
+
+* New logo! (see #719)
+* Improve the README and docs (see #779, #722)
+* Fix the "calendars" extra (see #740)
+* Fix leap years when ``PREFER_DATES_FROM`` is set (see #738)
+* Fix ``STRICT_PARSING`` setting in ``no-spaces-time`` parser (see #715)
+* Consider ``RETURN_AS_TIME_PERIOD`` setting for ``relative-time`` parser (see #807)
+* Parse the 24hr time format with meridian info (see #634)
+* Other small improvements (see #698, #709, #710, #712, #730, #731, #735, #739, #784, #788, #795 and #801)
+
+
 0.7.6 (2020-06-12)
 ------------------
 

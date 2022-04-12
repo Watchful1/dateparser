@@ -1,45 +1,40 @@
-# -*- coding: utf-8 -*-
-import regex as re
 import json
 import os
 import shutil
 from collections import OrderedDict
-from orderedset import OrderedSet
-import six
 
-from dateparser_scripts.order_languages import language_locale_dict
+import regex as re
+
+from dateparser_scripts.order_languages import _get_language_locale_dict
 from dateparser_scripts.utils import get_dict_difference, get_raw_data
 
 APOSTROPHE_LOOK_ALIKE_CHARS = [
-    u'\N{RIGHT SINGLE QUOTATION MARK}',     # u'\u2019'
-    u'\N{MODIFIER LETTER APOSTROPHE}',      # u'\u02bc'
-    u'\N{MODIFIER LETTER TURNED COMMA}',    # u'\u02bb'
-    u'\N{ARMENIAN APOSTROPHE}',             # u'\u055a'
-    u'\N{LATIN SMALL LETTER SALTILLO}',     # u'\ua78c'
-    u'\N{PRIME}',                           # u'\u2032'
-    u'\N{REVERSED PRIME}',                  # u'\u2035'
-    u'\N{MODIFIER LETTER PRIME}',           # u'\u02b9'
-    u'\N{FULLWIDTH APOSTROPHE}',            # u'\uff07'
+    '\N{RIGHT SINGLE QUOTATION MARK}',     # '\u2019'
+    '\N{MODIFIER LETTER APOSTROPHE}',      # '\u02bc'
+    '\N{MODIFIER LETTER TURNED COMMA}',    # '\u02bb'
+    '\N{ARMENIAN APOSTROPHE}',             # '\u055a'
+    '\N{LATIN SMALL LETTER SALTILLO}',     # '\ua78c'
+    '\N{PRIME}',                           # '\u2032'
+    '\N{REVERSED PRIME}',                  # '\u2035'
+    '\N{MODIFIER LETTER PRIME}',           # '\u02b9'
+    '\N{FULLWIDTH APOSTROPHE}',            # '\uff07'
 ]
 
-DATE_ORDER_PATTERN = re.compile(u'([DMY])+\u200f*[-/. \t]*([DMY])+\u200f*[-/. \t]*([DMY])+')
+DATE_ORDER_PATTERN = re.compile('([DMY])+\u200f*[-/. \t]*([DMY])+\u200f*[-/. \t]*([DMY])+')
 RELATIVE_PATTERN = re.compile(r'(?<![\+\-]\s*)\{0\}')
 DEFAULT_MONTH_PATTERN = re.compile(r'^M?\d+$', re.U)
-RE_SANITIZE_APOSTROPHE = re.compile(u'|'.join(APOSTROPHE_LOOK_ALIKE_CHARS))
+RE_SANITIZE_APOSTROPHE = re.compile('|'.join(APOSTROPHE_LOOK_ALIKE_CHARS))
 AM_PATTERN = re.compile(r'^\s*[Aa]\s*\.?\s*[Mm]\s*\.?\s*$')
 PM_PATTERN = re.compile(r'^\s*[Pp]\s*\.?\s*[Mm]\s*\.?\s*$')
 PARENTHESIS_PATTERN = re.compile(r'[\(\)]')
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-get_raw_data()
 
 cldr_dates_full_dir = "../raw_data/cldr_dates_full/main/"
 
 
 def _filter_relative_string(relative_string):
-    return (isinstance(relative_string, six.string_types) and
-            RELATIVE_PATTERN.search(relative_string) and
-            not PARENTHESIS_PATTERN.search(relative_string))
+    return (isinstance(relative_string, str)
+            and RELATIVE_PATTERN.search(relative_string)
+            and not PARENTHESIS_PATTERN.search(relative_string))
 
 
 def _filter_month_name(month_name):
@@ -50,10 +45,10 @@ def _retrieve_locale_data(locale):
     ca_gregorian_file = cldr_dates_full_dir + locale + '/ca-gregorian.json'
     dateFields_file = cldr_dates_full_dir + locale + '/dateFields.json'
     with open(ca_gregorian_file) as f:
-        cldr_gregorian_data = json.load(f)
+        cldr_gregorian_data = json.load(f, object_pairs_hook=OrderedDict)
 
     with open(dateFields_file) as g:
-        cldr_datefields_data = json.load(g)
+        cldr_datefields_data = json.load(g, object_pairs_hook=OrderedDict)
 
     gregorian_dict = cldr_gregorian_data["main"][locale]["dates"]["calendars"]["gregorian"]
     date_fields_dict = cldr_datefields_data["main"][locale]["dates"]["fields"]
@@ -75,11 +70,12 @@ def _retrieve_locale_data(locale):
 
     try:
         date_format_string = gregorian_dict["dateFormats"]["short"].upper()
-    except:
+    except AttributeError:
         date_format_string = gregorian_dict["dateFormats"]["short"]["_value"].upper()
 
     json_dict["date_order"] = DATE_ORDER_PATTERN.sub(
-            r'\1\2\3', DATE_ORDER_PATTERN.search(date_format_string).group())
+        r'\1\2\3', DATE_ORDER_PATTERN.search(date_format_string).group()
+    )
 
     json_dict["january"] = list(filter(_filter_month_name,
                                        [gregorian_dict["months"][key1][key2]["1"]
@@ -295,22 +291,26 @@ def _retrieve_locale_data(locale):
 
 
 def _clean_string(given_string):
-    given_string = RE_SANITIZE_APOSTROPHE.sub(u"'", given_string)
+    given_string = RE_SANITIZE_APOSTROPHE.sub("'", given_string)
     given_string = given_string.replace('.', '')
     given_string = given_string.lower()
     return ' '.join(given_string.split())
 
 
 def _clean_dict(json_dict):
+    """Remove duplicates and sort"""
     for key, value in json_dict.items():
         if isinstance(value, list):
-            json_dict[key] = list(OrderedSet(map(_clean_string, value)))
+            json_dict[key] = sorted(OrderedDict.fromkeys(map(_clean_string, value)))
         elif isinstance(value, dict):
-            json_dict[key] = _clean_dict(value)
+            json_dict[key] = OrderedDict(sorted(value.items()))
+            json_dict[key] = _clean_dict(json_dict[key])
     return OrderedDict(filter(lambda x: x[1], json_dict.items()))
 
 
 def main():
+    get_raw_data()
+    language_locale_dict = _get_language_locale_dict()
     parent_directory = "../dateparser_data/cldr_language_data"
     directory = "../dateparser_data/cldr_language_data/date_translation_data/"
     if not os.path.isdir(parent_directory):
@@ -325,8 +325,8 @@ def main():
         locales_list = language_locale_dict[language]
         for locale in locales_list:
             json_locale_dict = _clean_dict(_retrieve_locale_data(locale))
-            locale_specific_dict[locale] = get_dict_difference(json_language_dict, json_locale_dict)
-        json_language_dict["locale_specific"] = locale_specific_dict
+            locale_specific_dict[locale] = _clean_dict(get_dict_difference(json_language_dict, json_locale_dict))
+        json_language_dict["locale_specific"] = OrderedDict(sorted(locale_specific_dict.items()))
         filename = directory + language + ".json"
         print("writing " + filename)
         json_string = json.dumps(json_language_dict, indent=4, separators=(',', ': '),

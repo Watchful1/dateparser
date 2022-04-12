@@ -6,17 +6,19 @@
 timezone_info_list = [
     {
         'regex_patterns':
-            [r'(.)%s$',],
+            [r'(.)%s$'],
         'replace':
             [
-             (r'(?:UTC|GMT)\\(\+|\-)0(\d):00', r'(?:UTC|GMT)\\\1\2'),   # UTC+n, UTC-n, GMT+n, GMT-n
-             (r'(?:UTC|GMT)\\(\+|\-)0(\d):(\d{2})', r'(?:UTC|GMT)\\\1\2:\3'),   # UTC+n:mm, UTC-n:mm,GMT+n:mm, GMT-n:mm
-             (r'(?:UTC|GMT)\\(\+|\-)(\d{2}):00', r'(?:UTC|GMT)\\\1\2'),     # UTC+nn, UTC-nn, GMT+nn, GMT-nn
-             (r'(?:UTC|GMT)(\\[+-])(\d{2}):(\d{2})', r'(?:UTC|GMT)\1\2:?\3.*'),     # UTC+nnmm, , UTC-nnmm, GMT+nnmm, GMT-nnmm
-             (r'UTC', r''),
-             (r':', r''),
-             (r':|UTC', r''),
-             (r'UTC', r'GMT'),
+                # UTC+n, UTC-n, GMT+n, GMT-n:
+                (r'(?:UTC|GMT)\\(\+|\-)0(\d):00', r'(?:UTC|GMT)\\\1\2'),
+                # UTC+n:mm, UTC-n:mm, GMT+n:mm, GMT-n:mm:
+                (r'(?:UTC|GMT)\\(\+|\-)0(\d):(\d{2})', r'(?:UTC|GMT)\\\1\2:\3'),
+                # UTC+nn, UTC-nn, GMT+nn, GMT-nn:
+                (r'(?:UTC|GMT)\\(\+|\-)(\d{2}):00', r'(?:UTC|GMT)\\\1\2'),
+                # UTC+nnmm, UTC-nnmm, GMT+nnmm, GMT-nnmm:
+                (r'(?:UTC|GMT)(\\[+-])(\d{2}):(\d{2})', r'(?:UTC|GMT)\1\2:?\3.*'),
+                # Others:
+                (r'UTC', r''), (r':', r''), (r':|UTC', r''), (r'UTC', r'GMT'),
             ],
         'timezones':
             [(r'UTC\-12:00', -43200),
@@ -368,7 +370,9 @@ timezone_info_list = [
              ('SCT', 14400),
              ('SDMT', -16800),
              ('SDT', -36000),
+             ('SEČ', 3600),
              ('SET', 3600),
+             ('SELČ', 7200),
              ('SGT', 28800),
              ('SHEST', 21600),
              ('SHET', 18000),
@@ -412,6 +416,7 @@ timezone_info_list = [
              ('UYT', -10800),
              ('UZST', 21600),
              ('UZT', 18000),
+             ('VEČ', 7200),
              ('VET', -16200),
              ('VLAST', 39600),
              ('VLAT', 36000),
@@ -456,6 +461,7 @@ timezone_info_list = [
              ('YST', -32400),
              ('YWT', -28800),
              ('zzz', 0),
-             ('Z', 0)]
+             ('Z', 0),
+             ('ZEČ', 0)]
     },
 ]
