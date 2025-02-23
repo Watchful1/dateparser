@@ -3,6 +3,145 @@
 History
 =======
 
+1.2.1 (2025-02-05)
+------------------
+
+Fixes:
+
+- Fix PytzUsageWarning (#1109)
+- Fix date_parser with prefer_month_of_year wrong results (#1224)
+- Fix skipped day when UTC and tz are different days (#1183)
+
+Improvements:
+
+- Avoid repeated loop over timezones (#1238)
+- Proofread README.rst (#1234)
+- Check for derived types for configuration (#1223)
+- Parse some abbreviated strings as relative dates (#1219)
+- Migrate from hijri-converter to hijridate (#1211)
+- Fixed ClusterFuzz build error by adding dateparser.data as a binary (#1208)
+- Fix an issue detected by OSSFuzz (#1203)
+- Support two-digit years in non-Gregorian calendars (#1187)
+- Refactored CI to run extras separately and test minimum versions of dependencies, replaced flake8 with ruff, fixed tests (#1248)
+- Set minimum versions for dependencies (#1248)
+- Limited ``numpy`` to 1.x when installing ``dateparser[fasttext]`` (#1248)
+
+
+1.2.0 (2023-11-17)
+------------------
+
+New features:
+
+- New ``PREFER_MONTH_OF_YEAR`` setting (#1146)
+
+Fixes:
+
+- Absolute years in Russian are no longer being treated as a number of years in
+  the past (#1129)
+
+Cleanups and internal improvements:
+
+- Removed the use of ``datetime.utcnow``, deprecated on Python 3.12 (#1179)
+- Applied Black formatting to the code base (#1158)
+- Initial integration with OSSFuzz (#1198)
+- Extended test cases (#1191)
+
+
+1.1.8 (2023-03-22)
+------------------
+
+Improvements:
+
+- Improved date parsing for Chinese (#1148)
+- Improved date parsing for Czech (#1151)
+- Reorder language by popularity (#1152)
+- Fix leak of memory in cache (#1140)
+- Add support for "\d units later" (#1154)
+- Move modification in CLDR data to yaml (#1153)
+- Add support to use timezone via settings to get PREFER_DATES_FROM result (#1155)
+
+
+1.1.7 (2023-02-02)
+------------------
+
+Improvements:
+
+- Add an “ago” synonym for Arabic (#1128)
+- Improved date parsing for Czech (#1131)
+- Improved date parsing for Indonesian (#1134)
+
+
+1.1.6 (2023-01-12)
+------------------
+
+Improvements:
+
+- Fix the bug where Monday is parsed as a month (#1121)
+- Prevent ReDoS in Spanish sentence splitting regex (#1084)
+
+
+1.1.5 (2022-12-29)
+------------------
+
+Improvements:
+
+- Parse short versions of day, month, and year (#1103)
+- Add a test for “in 1d” (#1104)
+- Update languages_info (#1107)
+- Add a workaround for zipimporter not having exec_module before Python 3.10 (#1069)
+- Stabilize tests at midnight (#1111)
+- Add a test case for French (#1110)
+
+Cleanups:
+
+- Remove the requirements-build file (#1113)
+
+
+1.1.4 (2022-11-21)
+------------------
+
+Improvements:
+
+- Improved support for languages such as Slovak, Indonesian, Hindi, German and Japanese (#1064, #1094, #986, #1071, #1068)
+- Recursively create a model home (#996)
+- Replace regex sub with simple string replace (#1095)
+- Add Python 3.10, 3.11 support (#1096)
+- Drop support for Python 3.5, 3.6 versions (#1097)
+
+
+1.1.3 (2022-11-03)
+------------------
+
+New features:
+
+- Add support for fractional units (#876)
+
+Improvements:
+
+- Fix the returned datetime skipping a day with time+timezone input and PREFER_DATES_FROM = 'future' (#1002)
+- Fix input translatation breaking keep_formatting (#720)
+- English: support "till date" (#1005)
+- English: support “after” and “before” in relative dates (#1008)
+
+Cleanups:
+
+- Reorganize internal data (#1090)
+- CI updates (#1088)
+
+
+1.1.2 (2022-10-20)
+------------------
+
+Improvements:
+
+- Added support for negative timestamp (#1060)
+- Fixed PytzUsageWarning for Python versions >= 3.6 (#1062)
+- Added support for dates with dots and spaces (#1028)
+- Improved support for Ukrainian, Croatian and Russian (#1072, #1074, #1079, #1082, #1073, #1083)
+- Added support for parsing Unix timestamps consistently regardless of timezones (#954)
+- Improved tests (#1086)
+
+
 1.1.1 (2022-03-17)
 ------------------
 
